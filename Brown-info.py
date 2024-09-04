@@ -134,7 +134,7 @@ def process_domain(domain):
 
     # Extract .js files from URLs with status code 200
     print("[+] Extracting .js files from URLs with status code 200...")
-    js_wb_files = run_command(f"cat {domain}/all_urls.txt | httpx -mc 200 | grep .js | tee -a js.txt")
+    js_wb_files = run_command(f"cat {domain}/all_urls.txt | httpx -mc 200 | grep .js | tee -a {domain}/js.txt")
     print_count(domain, 'js')
 
     # Use nuclei to find exposures in .js files
