@@ -103,7 +103,9 @@ def process_domain(domain):
         print("[!] httpx not found!")
 
     #performing dirserarch on 403 and 404 subdomains
-    dirsearch(domain,
+    dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt'))
+    dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt'))
+
     
 
     # Find URLs using waybackurls
