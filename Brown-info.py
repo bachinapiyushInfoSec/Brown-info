@@ -1,7 +1,7 @@
 import os
 import subprocess
 import sys
-from dirsearch import dirsearch
+from dirsearch import dirsearch_cmd
 
 def command_exists(command):
     """Check if a command exists on the system."""
