@@ -14,5 +14,13 @@ def run_command(command):
     return result.stdout.strip()
 
 
+if command_exists("dirsearch"):
+        print("[+] Running dirsearch...")
+        dirsearch_output = run_command(f"python dirsearch.py -e php,asp,aspx,jsp,py,txt,conf,config,bak,backup,swp,old,db,sqlasp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,old,sql,sql.gz,sql.zip,sql.tar.gz,sql~,swp,swp~,tar,tar.bz2,tar.gz,txt,wadl,zip -l {domain}/403.txt -i 200 --full-url")
+        print(f"[+] Dirsearch results saved to {domain}/dirsearch-403.txt")
 
-if command_exists(
+
+if command_exists("dirsearch"):
+        print("[+] Running dirsearch...")
+        dirsearch_output = run_command(f"python dirsearch.py -e php,asp,aspx,jsp,py,txt,conf,config,bak,backup,swp,old,db,sqlasp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,old,sql,sql.gz,sql.zip,sql.tar.gz,sql~,swp,swp~,tar,tar.bz2,tar.gz,txt,wadl,zip -l {domain}/404.txt -i 200 --full-url")
+        print(f"[+] Dirsearch results saved to {domain}/dirsearch-404.txt")
