@@ -199,7 +199,8 @@ def main():
                 dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt'))
             except FileNotFound:
                 print("File not found or not in the correct directory!...")
-                print("use the path : <domain>/httpx/<403/404") """
+                print("use the path : <domain>/httpx/<403/404") 
+    """
     except IndexError:
         if mode == "-dir" :
             try:
