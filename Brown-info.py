@@ -2,7 +2,6 @@ import os
 import subprocess
 import sys
 
-
 def command_exists(command):
     """Check if a command exists on the system."""
     return subprocess.call(f"type {command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
