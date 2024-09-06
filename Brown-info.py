@@ -186,19 +186,28 @@ def main():
         exit(1)
 
     mode = sys.argv[1]
-
-    if (mode == "-dir" and sys.argv[2] in ('-h','--help')):
-        print("use the path : <domain>/httpx/<403/404>.txt")
-        print("use only <403/404>.txt as filename in the /httpx/ directory!")
-        print("example: example.com/httpx/403.txt")
-        
-    elif mode == "-dir" :
-        try:
-            dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt'))
-            dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt'))
-        except FileNotFound:
-            print("File not found or not in the correct directory!...")
-            print("use the path : <domain>/httpx/<403/404")
+    
+    try:
+        if (mode == "-dir" and sys.argv[2] in ('-h','--help')):
+            print("use the path : <domain>/httpx/<403/404>.txt")
+            print("use only <403/404>.txt as filename in the /httpx/ directory!")
+            print("example: example.com/httpx/403.txt")
+         """   
+        if mode == "-dir" :
+            try:
+                dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt'))
+                dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt'))
+            except FileNotFound:
+                print("File not found or not in the correct directory!...")
+                print("use the path : <domain>/httpx/<403/404") """
+    except IndexError:
+        if mode == "-dir" :
+            try:
+                dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt'))
+                dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt'))
+            except FileNotFound:
+                print("File not found or not in the correct directory!...")
+                print("use the path : <domain>/httpx/<403/404")
             
     if mode == "-d":
         userInput = sys.argv[2]
