@@ -13,10 +13,12 @@ def run_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     return result.stdout.strip()
 
-def dirsearch(domain,flags):
+def dirsearch(domain,output_file):
     if not command_exists("dirsearch"):
         exit(1)
-        
+    extensions = "php,asp,aspx,jsp,py,txt,conf,config,bak,backup,swp,old,db,sql,asp,aspx,py,rb,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,lock,log,rar,old,sql,sql.gz,tar,tar.gz,txt,wadl,zip"
+   return command = f"python3 dirsearch.py -e {extensions} -l -o {domain}/{output_file}.txt -i 200 --full-url"
+
     print("[+] Running dirsearch...")
     dirsearch_output = run_command(f"python dirsearch.py -e php,asp,aspx,jsp,py,txt,conf,config,bak,backup,swp,old,db,sqlasp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,old,sql,sql.gz,sql.zip,sql.tar.gz,sql~,swp,swp~,tar,tar.bz2,tar.gz,txt,wadl,zip -l {domain}/403.txt -i 200 --full-url")
     print(f"[+] Dirsearch results saved to {domain}/dirsearch-403.txt")
