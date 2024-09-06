@@ -103,9 +103,7 @@ def process_domain(domain):
         print("[!] httpx not found!")
 
     #performing dirserarch on 403 and 404 subdomains
-    dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt'))
-    dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt'))
-
+    
     
 
     # Find URLs using waybackurls
@@ -192,6 +190,20 @@ def main():
 
     if mode == "-d":
         process_domain(userInput)
+        
+    if mode == "-dir" and sys.argv[3] not in ('-h','--help'):
+        try:
+            dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt'))
+            dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt'))
+        except FileNotFound:
+            print("File not found or not in the correct directory!...")
+            print("use the path : <domain>/httpx/<403/404")
+            
+    if (mode == "-dir" and sys.argv[3] in ('-h','--help')):
+        print("use the path : <domain>/httpx/<403/404>.txt")
+        print("use only <403/404>.txt as filename in the /httpx/ directory!")
+        print("example: example.com/httpx/403.txt")
+        
 
     if mode == "-l":
         # Read the list of domains
