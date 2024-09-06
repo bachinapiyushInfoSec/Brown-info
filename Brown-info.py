@@ -192,7 +192,7 @@ def main():
             print("use the path : <domain>/httpx/<403/404>.txt")
             print("use only <403/404>.txt as filename in the /httpx/ directory!")
             print("example: example.com/httpx/403.txt")
-         """   
+    """   
         if mode == "-dir" :
             try:
                 dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt'))
