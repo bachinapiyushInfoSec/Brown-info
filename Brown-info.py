@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+from dirsearch import dirsearch
 
 def command_exists(command):
     """Check if a command exists on the system."""
@@ -84,13 +85,26 @@ def process_domain(domain):
         httpx_output = run_command(f"httpx -silent -status-code -l {domain}/all_subdomains.txt -o {domain}/all_codes.txt")
 
         # Extracting URLs with status code 200
-        urls_with_200 = run_command(f"grep '200' {domain}/all_codes.txt | awk '{{print $1}}'")
-        with open(f"{domain}/200.txt", "w") as f:
-            f.write(urls_with_200)
+        urls_with_200 = run_command(f"grep '200' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/200.txt ")
+        urls_with_300 = run_command(f"grep -E '301|302'  {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/300.txt ")
+        urls_with_403 = run_command(f"grep '403' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/403.txt ")
+        urls_with_404 = run_command(f"grep '404' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/404.txt ")
 
-        print(f"[+] Saved subdomains with status code 200 to {domain}/200.txt")
+
+
+
+        print(f"[+] Saved subdomains with status code 200 to {domain}/httpx/200.txt")
+        print(f"[+] Saved subdomains with status code 300 to {domain}/httpx/300.txt")
+        print(f"[+] Saved subdomains with status code 403 to {domain}/httpx/403.txt")
+        print(f"[+] Saved subdomains with status code 404 to {domain}/httpx/404.txt")
+
+
     else:
         print("[!] httpx not found!")
+
+    #performing dirserarch on 403 and 404 subdomains
+    dirsearch(domain,
+    
 
     # Find URLs using waybackurls
     if command_exists("waybackurls"):
