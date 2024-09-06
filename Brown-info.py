@@ -186,10 +186,6 @@ def main():
         exit(1)
 
     mode = sys.argv[1]
-    userInput = sys.argv[2]
-
-    if mode == "-d":
-        process_domain(userInput)
 
     if (mode == "-dir" and sys.argv[2] in ('-h','--help')):
         print("use the path : <domain>/httpx/<403/404>.txt")
@@ -204,11 +200,12 @@ def main():
             print("File not found or not in the correct directory!...")
             print("use the path : <domain>/httpx/<403/404")
             
-    
-    
-        
+    if mode == "-d":
+        userInput = sys.argv[2]
+        process_domain(userInput)
 
     if mode == "-l":
+        userInput = sys.argv[2]
         # Read the list of domains
         with open(userInput, 'r') as file:
             domains = file.readlines()
@@ -217,7 +214,7 @@ def main():
         for domain in domains:
             process_domain(domain.strip())
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
