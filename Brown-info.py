@@ -15,7 +15,7 @@ def run_command(command):
 
 def print_count(domain, command):
     count = run_command(f"cat {domain}/{command}.txt | wc -l")
-    print(f"{command}: {count}")
+    print(f"[*] {command}: {count}")
 
 def process_domain(domain):
     print(f"[+] Processing domain: {domain}")
@@ -79,34 +79,36 @@ def process_domain(domain):
     print(f"[+] Found {len(combined_subdomains.splitlines())} unique subdomains.")
     print(f"[+] Results saved to {domain}/all_subdomains.txt")
 
+
+
     # Check HTTP status codes using httpx
+
     if command_exists("httpx"):
         print("[+] Running httpx to check status codes...")
         httpx_output = run_command(f"httpx -silent -status-code -l {domain}/all_subdomains.txt -o {domain}/all_codes.txt")
 
         # Extracting URLs with status code 200
+
+        os.makedirs(f"{domain}/httpx", exist_ok=True)
         urls_with_200 = run_command(f"grep '200' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/200.txt ")
         urls_with_300 = run_command(f"grep -E '301|302'  {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/300.txt ")
         urls_with_403 = run_command(f"grep '403' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/403.txt ")
         urls_with_404 = run_command(f"grep '404' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/404.txt ")
 
-
-
+        # Printing the output of each type of URLs
 
         print(f"[+] Saved subdomains with status code 200 to {domain}/httpx/200.txt")
         print(f"[+] Saved subdomains with status code 300 to {domain}/httpx/300.txt")
         print(f"[+] Saved subdomains with status code 403 to {domain}/httpx/403.txt")
         print(f"[+] Saved subdomains with status code 404 to {domain}/httpx/404.txt")
 
-
     else:
         print("[!] httpx not found!")
 
-    #performing dirserarch on 403 and 404 subdomains
-    
-    
+
 
     # Find URLs using waybackurls
+
     if command_exists("waybackurls"):
         print("[+] Running waybackurls...")
         waybackurls_output = run_command(f"cat {domain}/all_subdomains.txt | waybackurls")
@@ -116,7 +118,10 @@ def process_domain(domain):
     else:
         print("[!] waybackurls not found!")
 
+
+
     # Find URLs using gau
+
     if command_exists("gau"):
         print("[+] Running gau...")
         gau_output = run_command(f"gau {domain}")
@@ -126,7 +131,10 @@ def process_domain(domain):
     else:
         print("[!] gau not found!")
 
+
+
     # Find URLs using katana
+
     if command_exists("katana"):
         print("[+] Running katana...")
         katana_output = run_command(f"katana -list {domain}/all_subdomains.txt -silent -o {domain}/katana.txt")
@@ -136,7 +144,9 @@ def process_domain(domain):
     else:
         print("[!] katana not found!")
 
+
     # Combine all URLs found by the tools, sort and remove duplicates
+
     print("[+] Combining all URLs found...")
     combined_urls = run_command(f"cat {domain}/waybackurls.txt {domain}/gau.txt {domain}/katana.txt | sort -u")
     with open(f"{domain}/all_urls.txt", "w") as f:
@@ -144,6 +154,8 @@ def process_domain(domain):
 
     print(f"[+] Found {len(combined_urls.splitlines())} unique URLs.")
     print(f"[+] Results saved to {domain}/all_urls.txt")
+
+
 
     # Extract .js files from URLs with status code 200
     print("[+] Extracting .js files from URLs with status code 200...")
@@ -192,20 +204,19 @@ def main():
             print("use the path : <domain>/httpx/<403/404>.txt")
             print("use only <403/404>.txt as filename in the /httpx/ directory!")
             print("example: example.com/httpx/403.txt")
-    # if mode == "-dir":  
-    #     try:
-    #         dirsearch_403 = run_command(dirsearch_cmd(f'{domain}/httpx/403.txt'))
-    #         dirsearch_404 = run_command(dirsearch_cmd(f'{domain}/httpx/404.txt'))
-    #     except FileNotFound:  
-    #         print("File not found or not in the correct directory!...")
-    #         print("use the path : <domain>/httpx/<403/404") 
     
     except IndexError:
-        if mode == "-dir" :
+        if mode == "-dir":
             try:
+                print("[+] Running dirsearch on 403 subdomains...")
                 dirsearch_403= run_command(dirsearch_cmd(f'httpx/403.txt'))
+                print(f"[+] Dirsearch results saved to httpx/403.txt")
+
+                print("[+] Running dirsearch on 404 subdomains...")
                 dirsearch_404= run_command(dirsearch_cmd(f'httpx/404.txt'))
-            except FileNotFound:
+                print(f"[+] Dirsearch results saved to httpx/404.txt")
+
+            except FileNotFoundError:
                 print("File not found or not in the correct directory!...")
                 print("use the path : <domain>/httpx/<403/404")
             
