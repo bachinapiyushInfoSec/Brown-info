@@ -208,12 +208,13 @@ def main():
     except IndexError:
         if mode == "-dir":
             try:
+                os.makedirs(f"{domain}/dirsearch", exist_ok=True)
                 print("[+] Running dirsearch on 403 subdomains...")
-                dirsearch_403= run_command(dirsearch_cmd(f'httpx/403.txt'))
+                dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt', f'{domain}/dirsearch/dirsearch_403.txt'))
                 print(f"[+] Dirsearch results saved to httpx/403.txt")
 
                 print("[+] Running dirsearch on 404 subdomains...")
-                dirsearch_404= run_command(dirsearch_cmd(f'httpx/404.txt'))
+                dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt', f'{domain}/dirsearch/dirsearch_404.txt'))
                 print(f"[+] Dirsearch results saved to httpx/404.txt")
 
             except FileNotFoundError:
