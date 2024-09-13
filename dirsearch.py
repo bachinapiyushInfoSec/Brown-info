@@ -17,6 +17,8 @@ def dirsearch_cmd(in_path, out_path):
     extensions = "php,asp,aspx,jsp,py,txt,conf,config,bak,backup,swp,old,db,sql,asp,aspx,py,rb,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,lock,log,rar,old,sql,sql.gz,tar,tar.gz,txt,wadl,zip"
     return f"python3 dirsearch.py -e {extensions} -l {in_path} -o {out_path} -i 200 --full-url"
 
+
+
     
 
     
