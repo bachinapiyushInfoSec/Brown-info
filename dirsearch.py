@@ -1,4 +1,6 @@
 import subprocess
+import os
+
 
 def command_exists(command):
     """Check if a command exists on the system."""
@@ -18,7 +20,14 @@ def dirsearch_cmd(in_path, out_path):
     return f"python3 dirsearch.py -e {extensions} -l {in_path} -o {out_path} -i 200 --full-url"
 
 
+def run_dirsearch(domain):
+        os.makedirs(f"{domain}/dirsearch", exist_ok=True)
+        print("[+] Running dirsearch on 403 subdomains...")
+        dirsearch_403 = run_command(dirsearch_cmd(f'{domain}/httpx/403.txt', f'{domain}/dirsearch/dirsearch_403.txt'))
+        print(f"[+] Dirsearch results saved to httpx/403.txt")
 
-    
+        print("[+] Running dirsearch on 404 subdomains...")
+        dirsearch_404 = run_command(dirsearch_cmd(f'{domain}/httpx/404.txt', f'{domain}/dirsearch/dirsearch_404.txt'))
+        print(f"[+] Dirsearch results saved to httpx/404.txt")
 
-    
+
