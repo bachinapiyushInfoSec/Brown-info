@@ -198,28 +198,37 @@ def main():
         exit(1)
 
     mode = sys.argv[1]
+    userInput = sys.argv[2]
     
     try:
-        if (mode == "-dir" and sys.argv[2] in ('-h','--help')):
+        userInput = sys.argv[2]
+        if (mode == "-dir" and userInput in ('-h','--help')):
             print("use the path : <domain>/httpx/<403/404>.txt")
             print("use only <403/404>.txt as filename in the /httpx/ directory!")
             print("example: example.com/httpx/403.txt")
     
     except IndexError:
-        if mode == "-dir":
+        if mode == "-dir" and userInput != '':
             try:
+                domain = sys.argv[2]
                 os.makedirs("dirsearch", exist_ok=True)
                 print("[+] Running dirsearch on 403 subdomains...")
-                dirsearch_403= run_command(dirsearch_cmd(f'/httpx/403.txt', f'dirsearch/dirsearch_403.txt'))
+                dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt', f'dirsearch/dirsearch_403.txt'))
                 print(f"[+] Dirsearch results saved to httpx/403.txt")
 
                 print("[+] Running dirsearch on 404 subdomains...")
-                dirsearch_404= run_command(dirsearch_cmd(f'httpx/404.txt', f'dirsearch/dirsearch_404.txt'))
+                dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt', f'dirsearch/dirsearch_404.txt'))
                 print(f"[+] Dirsearch results saved to httpx/404.txt")
 
             except FileNotFoundError:
                 print("File not found or not in the correct directory!...")
                 print("use the path : <domain>/httpx/<403/404")
+
+            except IndexError:
+                print("Enter the folder containing the 'httpx' folder...")
+                print("cmd: python3 Brown-info.py -dir <domain/folder>")
+                print("example: python3 Brown-info.py -dir example.com")
+
             
     if mode == "-d":
         userInput = sys.argv[2]
