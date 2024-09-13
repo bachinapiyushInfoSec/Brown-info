@@ -1,7 +1,8 @@
 import os
 import subprocess
 import sys
-from dirsearch import dirsearch_cmd
+import dirsearch
+
 
 def command_exists(command):
     """Check if a command exists on the system."""
@@ -13,9 +14,11 @@ def run_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     return result.stdout.strip()
 
+
 def print_count(domain, command):
     count = run_command(f"cat {domain}/{command}.txt | wc -l")
     print(f"[*] {command}: {count}")
+
 
 def process_domain(domain):
     print(f"[+] Processing domain: {domain}")
@@ -29,7 +32,7 @@ def process_domain(domain):
         output = run_command(f"subfinder -d {domain} -all --recursive -silent")
         with open(f"{domain}/subfinder.txt", "w") as f:
             f.write(output)
-        print_count(domain,'subfinder')
+        print_count(domain, 'subfinder')
     else:
         print("[!] subfinder not found!")
 
@@ -53,11 +56,12 @@ def process_domain(domain):
 
     # Enumerate subdomains using crt.sh
     print("[+] Querying crt.sh...")
-    crtsh_output = run_command(f"curl -s 'https://crt.sh/?q=%25.{domain}&output=json' | jq -r '.[].name_value' | sed 's/\\*\\.//g' | sort -u")
+    crtsh_output = run_command(
+        f"curl -s 'https://crt.sh/?q=%25.{domain}&output=json' | jq -r '.[].name_value' | sed 's/\\*\\.//g' | sort -u")
     with open(f"{domain}/crtsh.txt", "w") as f:
         f.write(crtsh_output)
     print_count(domain, 'crtsh')
-    
+
     # Enumerate subdomains using amass
     if command_exists("amass"):
         print("[+] Running amass with a 3-hour limit...")
@@ -79,21 +83,24 @@ def process_domain(domain):
     print(f"[+] Found {len(combined_subdomains.splitlines())} unique subdomains.")
     print(f"[+] Results saved to {domain}/all_subdomains.txt")
 
-
-
     # Check HTTP status codes using httpx
 
     if command_exists("httpx"):
         print("[+] Running httpx to check status codes...")
-        httpx_output = run_command(f"httpx -silent -status-code -l {domain}/all_subdomains.txt -o {domain}/all_codes.txt")
+        httpx_output = run_command(
+            f"httpx -silent -status-code -l {domain}/all_subdomains.txt -o {domain}/all_codes.txt")
 
         # Extracting URLs with status code 200
 
         os.makedirs(f"{domain}/httpx", exist_ok=True)
-        urls_with_200 = run_command(f"grep '200' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/200.txt ")
-        urls_with_300 = run_command(f"grep -E '301|302'  {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/300.txt ")
-        urls_with_403 = run_command(f"grep '403' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/403.txt ")
-        urls_with_404 = run_command(f"grep '404' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/404.txt ")
+        urls_with_200 = run_command(
+            f"grep '200' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/200.txt ")
+        urls_with_300 = run_command(
+            f"grep -E '301|302'  {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/300.txt ")
+        urls_with_403 = run_command(
+            f"grep '403' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/403.txt ")
+        urls_with_404 = run_command(
+            f"grep '404' {domain}/all_codes.txt | awk '{{print $1}}' | tee {domain}/httpx/404.txt ")
 
         # Printing the output of each type of URLs
 
@@ -104,8 +111,6 @@ def process_domain(domain):
 
     else:
         print("[!] httpx not found!")
-
-
 
     # Find URLs using waybackurls
 
@@ -118,8 +123,6 @@ def process_domain(domain):
     else:
         print("[!] waybackurls not found!")
 
-
-
     # Find URLs using gau
 
     if command_exists("gau"):
@@ -130,8 +133,6 @@ def process_domain(domain):
         print_count(domain, 'gau')
     else:
         print("[!] gau not found!")
-
-
 
     # Find URLs using katana
 
@@ -144,7 +145,6 @@ def process_domain(domain):
     else:
         print("[!] katana not found!")
 
-
     # Combine all URLs found by the tools, sort and remove duplicates
 
     print("[+] Combining all URLs found...")
@@ -155,8 +155,6 @@ def process_domain(domain):
     print(f"[+] Found {len(combined_urls.splitlines())} unique URLs.")
     print(f"[+] Results saved to {domain}/all_urls.txt")
 
-
-
     # Extract .js files from URLs with status code 200
     print("[+] Extracting .js files from URLs with status code 200...")
     js_wb_files = run_command(f"cat {domain}/all_urls.txt | httpx -mc 200 | grep .js | tee -a {domain}/js.txt")
@@ -165,7 +163,8 @@ def process_domain(domain):
     # Use nuclei to find exposures in .js files
     if command_exists("nuclei"):
         print("[+] Running nuclei on .js files...")
-        nuclei_output = run_command(f"nuclei -l {domain}/js.txt -t ~/nuclei-templates/http/exposures/ -o {domain}/js_exposures_results.txt")
+        nuclei_output = run_command(
+            f"nuclei -l {domain}/js.txt -t ~/nuclei-templates/http/exposures/ -o {domain}/js_exposures_results.txt")
         print(f"[+] Nuclei results saved to {domain}/js_exposures_results.txt")
         print_count(domain, 'js_exposures_results')
     else:
@@ -173,7 +172,8 @@ def process_domain(domain):
 
     # Find potential IDOR vulnerable URLs
     print("[+] Searching for potential IDOR vulnerable URLs...")
-    idor_urls = run_command(f"grep -E -i '(\\?|&)(id|user_id|account_id|profile_id|order_id|item_id|product_id|uid|pid|cid|token|session)=[0-9]+' {domain}/all_urls.txt")
+    idor_urls = run_command(
+        f"grep -E -i '(\\?|&)(id|user_id|account_id|profile_id|order_id|item_id|product_id|uid|pid|cid|token|session)=[0-9]+' {domain}/all_urls.txt")
     with open(f"{domain}/IDOR.txt", "w") as f:
         f.write(idor_urls)
     print(f"[+] Found potential IDOR vulnerable URLs in {domain}/IDOR.txt")
@@ -181,7 +181,8 @@ def process_domain(domain):
 
     # Find potential open redirect vulnerable URLs
     print("[+] Searching for potential open redirect vulnerable URLs...")
-    open_redirect_urls = run_command(f"grep -E -i '(\\?|&)(next|url|redirect|out|view|redir|target|rurl|link|go|to|ReturnUrl|RedirectUrl|q|link|src|linkAddress|location|burl|request|backurl|RedirectUrl|Redirect|ReturnUrl|allinurl|u|recurl|uri|service|sp_url|action|action_url|redirect|redirecturl|returnurl|u1|page|desturl|origin|originUrl|originurl|jump|jump_url|callback_url|pic|forward|forward_url|rit_url|goto|clickurl|ext|logout|login|qurl|logout|data|success|return_path|continue|checkout_url|return_to|returnTo|return|go|image_url|to|view|out|cgi-bin|redirect.cgi|destination|dest|redirect_uri|redirect_url|out)=(http|https|%2f|@|//)' {domain}/all_urls.txt")
+    open_redirect_urls = run_command(
+        f"grep -E -i '(\\?|&)(next|url|redirect|out|view|redir|target|rurl|link|go|to|ReturnUrl|RedirectUrl|q|link|src|linkAddress|location|burl|request|backurl|RedirectUrl|Redirect|ReturnUrl|allinurl|u|recurl|uri|service|sp_url|action|action_url|redirect|redirecturl|returnurl|u1|page|desturl|origin|originUrl|originurl|jump|jump_url|callback_url|pic|forward|forward_url|rit_url|goto|clickurl|ext|logout|login|qurl|logout|data|success|return_path|continue|checkout_url|return_to|returnTo|return|go|image_url|to|view|out|cgi-bin|redirect.cgi|destination|dest|redirect_uri|redirect_url|out)=(http|https|%2f|@|//)' {domain}/all_urls.txt")
     with open(f"{domain}/open_redirect.txt", "w") as f:
         f.write(open_redirect_urls)
     print_count(domain, 'open_redirect')
@@ -193,56 +194,46 @@ def process_domain(domain):
 
 def main():
     # Check if a domain list was provided
+    global mode, userInput
     if len(sys.argv) < 2:
         print("Usage: python script.py <mode> <domain/list>")
         exit(1)
 
-    mode = sys.argv[1]
-    userInput = sys.argv[2]
-    
     try:
+        mode = sys.argv[1]
         userInput = sys.argv[2]
-        if (mode == "-dir" and userInput in ('-h','--help')):
-            print("use the path : <domain>/httpx/<403/404>.txt")
-            print("use only <403/404>.txt as filename in the /httpx/ directory!")
-            print("example: example.com/httpx/403.txt")
-    
+
     except IndexError:
-        if mode == "-dir" and userInput != '':
-            try:
-                domain = sys.argv[2]
-                os.makedirs("dirsearch", exist_ok=True)
-                print("[+] Running dirsearch on 403 subdomains...")
-                dirsearch_403= run_command(dirsearch_cmd(f'{domain}/httpx/403.txt', f'dirsearch/dirsearch_403.txt'))
-                print(f"[+] Dirsearch results saved to httpx/403.txt")
+        print("[!] Insufficient arguments....")
+        exit(1)
 
-                print("[+] Running dirsearch on 404 subdomains...")
-                dirsearch_404= run_command(dirsearch_cmd(f'{domain}/httpx/404.txt', f'dirsearch/dirsearch_404.txt'))
-                print(f"[+] Dirsearch results saved to httpx/404.txt")
 
-            except FileNotFoundError:
-                print("File not found or not in the correct directory!...")
-                print("use the path : <domain>/httpx/<403/404")
+    try:
+        if (mode == "-dir" and userInput in ('-h', '--help')):
+            print("[>] use the path : <domain>/httpx/<403/404>.txt")
+            print("[>] use only <403/404>.txt as filename in the /httpx/ directory!")
+            print("[>] example: example.com/httpx/403.txt")
+            print("[>] cmd for dirsearch: python3 Brown-info.py -dir <domain/folder>")
+            print("[>] example: python3 Brown-info.py -dir example.com")
+        elif mode == "-dir" and userInput != '':
+            dirsearch.run_dirsearch(userInput)
+    except FileNotFoundError:
+        print("[!] File not found or not in the correct directory!...")
+        print("[!] Refer the dirsearch help menu ( -dir -h,--help) ")
 
-            except IndexError:
-                print("Enter the folder containing the 'httpx' folder...")
-                print("cmd: python3 Brown-info.py -dir <domain/folder>")
-                print("example: python3 Brown-info.py -dir example.com")
 
-            
     if mode == "-d":
-        userInput = sys.argv[2]
         process_domain(userInput)
 
+
     if mode == "-l":
-        userInput = sys.argv[2]
         # Read the list of domains
         with open(userInput, 'r') as file:
             domains = file.readlines()
-
         # Process each domain
         for domain in domains:
             process_domain(domain.strip())
+
 
 if __name__ == "__main__":
     try:
